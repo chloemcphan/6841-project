@@ -27,11 +27,16 @@ if client_mode == "1":
     client.send(public_key.save_pkcs1("PEM"))
     public_partner_key = rsa.PublicKey.load_pkcs1(client.recv(1024))
     
-    # setting up the AES keys and  cypher to encrypt the messages
+    # setting up the AES keys and cypher to encrypt the messages
     aes_key = get_random_bytes(16)
     cipher = AES.new(aes_key, AES.MODE_OCB)
     
     client.send(rsa.encrypt(aes_key, public_partner_key))
+
+    # Clear the keys used in the key exchange process so that they cannot be used again
+    public_key = None
+    private_key = None
+    public_partner_key = None
 
 elif client_mode == "2":
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,6 +49,11 @@ elif client_mode == "2":
     # receiving the AES key and decrypting using RSA
     aes_key = rsa.decrypt(client.recv(1024), private_key)
     cipher = AES.new(aes_key, AES.MODE_OCB) 
+
+    # Clear the keys used in the key exchange process so that they cannot be used again
+    public_key = None
+    private_key = None
+    public_partner_key = None
 else:
     exit()
 
